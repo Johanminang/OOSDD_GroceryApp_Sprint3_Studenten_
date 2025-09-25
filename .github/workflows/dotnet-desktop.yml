@@ -1,5 +1,5 @@
-name: MAUI Android CI
-
+name: MAUI Unit Tests
+ 
 on:
   push:
     branches:
@@ -7,40 +7,28 @@ on:
   pull_request:
     branches:
       - '**'
-
+ 
 jobs:
-  build-test:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest  # Of windows-latest/macOS-latest als specifiek platform nodig is
     steps:
-      # 1. Checkout the repository
-      - name: Checkout repository
+      - name: Haal de repository op
         uses: actions/checkout@v4
-
-      # 2. Setup .NET SDK
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+ 
+      - name: Installeer .NET SDK
+        uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0.x'
-
-      # 3. Install MAUI workloads for Android only
-      - name: Install MAUI workloads
+          dotnet-version: '8.0.x'  # Gebruik de juiste versie voor MAUI
+ 
+      - name: Installeer MAUI workloads
         run: dotnet workload install maui-android
+ 
+      - name: Herstel afhankelijkheden
+        run: dotnet restore
+ 
+      - name: Bouw de applicatie
+        run: dotnet build --configuration Release --no-restore
 
-      # 4. Restore all projects (Android only)
-      - name: Restore dependencies
-        run: dotnet restore -p:TargetFramework=net8.0-android
-
-      # 5. Build Android project and all dependent libraries
-      - name: Build Android project
-        run: dotnet build Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android --configuration Release --no-restore
-
-      # 6. Run unit tests (Android only)
-      - name: Run unit tests
-        run: dotnet test Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android --configuration Release --no-restore --no-build --verbosity normal
-
-      # 7. Upload build artifacts (optional)
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: BuildOutput
-          path: '**/bin/Release/net8.0-android/'
+       # test uitvoeren 
+      - name: Voer unit tests uit
+        run: dotnet test --configuration Release --no-restore --no-build --verbosity normal
