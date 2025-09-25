@@ -12,27 +12,34 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
+      # 1. Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Setup .NET SDK
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
+      # 3. Install MAUI workloads for Android only
       - name: Install MAUI workloads for Android
         run: dotnet workload install maui-android
 
+      # 4. Restore dependencies (Android only)
       - name: Restore dependencies
-        run: dotnet restore Grocery.App/Grocery.App.csproj
+        run: dotnet restore Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android
 
+      # 5. Build Android project
       - name: Build Android project
-        run: dotnet build Grocery.App/Grocery.App.csproj -f net8.0-android --configuration Release --no-restore
+        run: dotnet build Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android --configuration Release --no-restore
 
+      # 6. Run unit tests
       - name: Run unit tests
-        run: dotnet test Grocery.App/Grocery.App.csproj -f net8.0-android --configuration Release --no-restore --no-build --verbosity normal
+        run: dotnet test Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android --configuration Release --no-restore --no-build --verbosity normal
 
-      - name: Upload build artifacts (optional)
+      # 7. Upload build artifacts (optional)
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: BuildOutput
