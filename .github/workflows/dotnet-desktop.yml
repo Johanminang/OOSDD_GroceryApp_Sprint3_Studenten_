@@ -23,18 +23,18 @@ jobs:
           dotnet-version: '8.0.x'
 
       # 3. Install MAUI workloads for Android only
-      - name: Install MAUI workloads for Android
+      - name: Install MAUI workloads
         run: dotnet workload install maui-android
 
-      # 4. Restore dependencies (Android only)
+      # 4. Restore all projects (Android only)
       - name: Restore dependencies
-        run: dotnet restore Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android
+        run: dotnet restore -p:TargetFramework=net8.0-android
 
-      # 5. Build Android project
+      # 5. Build Android project and all dependent libraries
       - name: Build Android project
         run: dotnet build Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android --configuration Release --no-restore
 
-      # 6. Run unit tests
+      # 6. Run unit tests (Android only)
       - name: Run unit tests
         run: dotnet test Grocery.App/Grocery.App.csproj -p:TargetFramework=net8.0-android --configuration Release --no-restore --no-build --verbosity normal
 
