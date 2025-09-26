@@ -13,10 +13,17 @@ namespace Grocery.Core.Services
         }
         public Client? Login(string email, string password)
         {
-            Client? client = _clientService.Get(email);
+            var client = _clientService.Get(email);
             if (client == null) return null;
-            if (PasswordHelper.VerifyPassword(password, client.Password)) return client;
-            return null;
+
+            // VerifyPassword kan "hash.salt" als combined string verwerken
+            bool ok = PasswordHelper.VerifyPassword(password, client.Password);
+            return ok ? client : null;
+        }
+        public Client Register(string name, string email, string password)
+        {
+            // forward naar clientService (die al de hashing + opslag uitvoert)
+            return _clientService.Register(name, email, password);
         }
     }
 }

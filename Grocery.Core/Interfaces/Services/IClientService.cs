@@ -1,4 +1,5 @@
 ﻿using Grocery.Core.Models;
+using System.Globalization;
 
 namespace Grocery.Core.Interfaces.Services
 {
@@ -8,6 +9,9 @@ namespace Grocery.Core.Interfaces.Services
 
         public Client? Get(int id);
 
+
         public List<Client> GetAll();
+
+        public Client Register(string name, string email, string password);
     }
 }

@@ -18,6 +18,8 @@ namespace Grocery.App.ViewModels
         
         public ObservableCollection<GroceryListItem> MyGroceryListItems { get; set; } = [];
         public ObservableCollection<Product> AvailableProducts { get; set; } = [];
+        public ObservableCollection<Product> FilteredProducts { get; set; } = [];
+
 
         [ObservableProperty]
         GroceryList groceryList = new(0, "None", DateOnly.MinValue, "", 0);
@@ -45,6 +47,11 @@ namespace Grocery.App.ViewModels
             foreach (Product p in _productService.GetAll())
                 if (MyGroceryListItems.FirstOrDefault(g => g.ProductId == p.Id) == null  && p.Stock > 0)
                     AvailableProducts.Add(p);
+
+            FilteredProducts.Clear();
+            foreach (var p in AvailableProducts)
+                FilteredProducts.Add(p);
+
         }
 
         partial void OnGroceryListChanged(GroceryList value)
@@ -85,6 +92,25 @@ namespace Grocery.App.ViewModels
                 await Toast.Make($"Opslaan mislukt: {ex.Message}").Show(cancellationToken);
             }
         }
+        [RelayCommand]
+        private void Search(string searchTerm)
+        {
+            FilteredProducts.Clear();
+
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                foreach (var product in AvailableProducts)
+                    FilteredProducts.Add(product);
+                return;
+            }
+
+            foreach (var product in AvailableProducts
+                     .Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
+            {
+                FilteredProducts.Add(product);
+            }
+        }
+
 
     }
 }

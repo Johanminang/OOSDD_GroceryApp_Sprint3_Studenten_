@@ -1,6 +1,7 @@
 ﻿using Grocery.Core.Interfaces.Repositories;
 using Grocery.Core.Interfaces.Services;
 using Grocery.Core.Models;
+using Grocery.Core.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,27 @@ namespace Grocery.Core.Services
         {
             List<Client> clients = _clientRepository.GetAll();
             return clients;
+        }
+
+        public Client Register(string name, string email, string password)
+        {
+            // Controleer of email al bestaat
+            if (_clientRepository.Get(email) != null)
+                throw new Exception("Dit e-mailadres is al geregistreerd.");
+
+            // Hash het wachtwoord - dit retourneert al de volledige hash string
+            string hashedPassword = PasswordHelper.HashPassword(password);
+
+            // Genereer nieuw ID
+            var all = _clientRepository.GetAll();
+            int newId = all.Count == 0 ? 1 : all.Max(c => c.Id) + 1;
+
+            // Gebruik de gehashte wachtwoord direct
+            var newClient = new Client(newId, name, email, hashedPassword);
+
+            // Opslaan in repository
+            _clientRepository.Add(newClient);
+            return newClient;
         }
     }
 }
