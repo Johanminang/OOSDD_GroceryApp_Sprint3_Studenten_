@@ -4,12 +4,16 @@ using CommunityToolkit.Mvvm.Input;
 using Grocery.Core.Interfaces.Services;
 using Grocery.Core.Models;
 
+
 namespace Grocery.App.ViewModels
 {
     public partial class LoginViewModel : BaseViewModel
     {
         private readonly IAuthService _authService;
         private readonly GlobalViewModel _global;
+
+        [ObservableProperty]
+        private string name = "";
 
         [ObservableProperty]
         private string email = "user3@mail.com";
@@ -27,19 +31,38 @@ namespace Grocery.App.ViewModels
         }
 
         [RelayCommand]
-        private void Login()
+        private async Task Login()
         {
             Client? authenticatedClient = _authService.Login(Email, Password);
             if (authenticatedClient != null)
             {
                 LoginMessage = $"Welkom {authenticatedClient.Name}!";
                 _global.Client = authenticatedClient;
+
+                // Navigatie naar hoofd-shell (MAUI)
                 Application.Current.MainPage = new AppShell();
             }
             else
             {
                 LoginMessage = "Ongeldige inloggegevens.";
+                await Application.Current.MainPage.DisplayAlert("Fout", "Ongeldige inloggegevens.", "OK");
             }
         }
+
+        // Register command
+        [RelayCommand]
+        private async Task Register()
+        {
+            try
+            {
+                var newClient = _authService.Register(Name, Email, Password);
+                await Application.Current.MainPage.DisplayAlert("Succes", "Registratie gelukt! Je kunt nu inloggen.", "OK");
+            }
+            catch (Exception ex)
+            {
+                await Application.Current.MainPage.DisplayAlert("Registratie mislukt", ex.Message, "OK");
+            }
+        }
+
     }
 }
